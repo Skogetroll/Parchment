@@ -522,74 +522,76 @@ open class EMPageViewController: UIViewController, UIScrollViewDelegate {
             
             // Scrolling forward / after
             if (progress > 0) {
-                if (self.afterViewController != nil) {
+                if let afterVC = self.afterViewController {
                     if !scrolling { // call willScroll once
-                        self.willScroll(from: self.selectedViewController, to: self.afterViewController!)
+                        self.willScroll(from: self.selectedViewController, to: afterVC)
                         self.scrolling = true
                     }
                     
                     if self.navigationDirection == .reverse { // check if direction changed
-                        self.didFinishScrolling(to: self.selectedViewController!)
-                        self.willScroll(from: self.selectedViewController, to: self.afterViewController!)
+                        if let selectedVC = self.selectedViewController {
+                            self.didFinishScrolling(to: selectedVC)
+                        }
+                        self.willScroll(from: self.selectedViewController, to: afterVC)
                     }
                     
                     self.navigationDirection = .forward
                     
-                    if (self.selectedViewController != nil) {
-                        self.delegate?.em_pageViewController?(self, isScrollingFrom: self.selectedViewController!, destinationViewController: self.afterViewController!, progress: progress)
+                    if let selectedVC = self.selectedViewController {
+                        self.delegate?.em_pageViewController?(self, isScrollingFrom: selectedVC, destinationViewController: afterVC, progress: progress)
                     }
-                } else {
-                    if (self.selectedViewController != nil) {
-                        self.delegate?.em_pageViewController?(self,
-                                                              isScrollingFrom: self.selectedViewController!,
-                                                              destinationViewController: nil,
-                                                              progress: progress)
-                    }
+                } else if let selectedVC = self.selectedViewController {
+                    self.delegate?.em_pageViewController?(self,
+                                                          isScrollingFrom: selectedVC,
+                                                          destinationViewController: nil,
+                                                          progress: progress)
                 }
                 
                 // Scrolling reverse / before
             } else if (progress < 0) {
-                if (self.beforeViewController != nil) {
+                if let beforeVC = self.beforeViewController {
                     if !scrolling { // call willScroll once
-                        self.willScroll(from: self.selectedViewController, to: self.beforeViewController!)
+                        self.willScroll(from: self.selectedViewController, to: beforeVC)
                         self.scrolling = true
                     }
                     
                     if self.navigationDirection == .forward { // check if direction changed
-                        self.didFinishScrolling(to: self.selectedViewController!)
-                        self.willScroll(from: self.selectedViewController, to: self.beforeViewController!)
+                        if let selectedVC = self.selectedViewController {
+                            self.didFinishScrolling(to: selectedVC)
+                        }
+                        self.willScroll(from: self.selectedViewController, to: beforeVC)
                     }
                     
                     self.navigationDirection = .reverse
                     
-                    if (self.selectedViewController != nil) {
-                        self.delegate?.em_pageViewController?(self, isScrollingFrom: self.selectedViewController!, destinationViewController: self.beforeViewController!, progress: progress)
+                    if let selectedVC = self.selectedViewController {
+                        self.delegate?.em_pageViewController?(self, isScrollingFrom: selectedVC, destinationViewController: beforeVC, progress: progress)
                     }
                 } else {
-                    if (self.selectedViewController != nil) {
+                    if let selectedVC = self.selectedViewController {
                         self.delegate?.em_pageViewController?(self,
-                                                              isScrollingFrom: self.selectedViewController!,
+                                                              isScrollingFrom: selectedVC,
                                                               destinationViewController: nil,
                                                               progress: progress)
                     }
                 }
                 
                 // At zero
-            } else {
-                if (self.navigationDirection == .forward) {
-                    self.delegate?.em_pageViewController?(self, isScrollingFrom: self.selectedViewController!, destinationViewController: self.afterViewController!, progress: progress)
-                } else if (self.navigationDirection == .reverse) {
-                    self.delegate?.em_pageViewController?(self, isScrollingFrom: self.selectedViewController!, destinationViewController: self.beforeViewController!, progress: progress)
+            } else if let selectedVC = self.selectedViewController {
+                if self.navigationDirection == .forward, let afterVC = self.afterViewController {
+                    self.delegate?.em_pageViewController?(self, isScrollingFrom: selectedVC, destinationViewController: afterVC, progress: progress)
+                } else if self.navigationDirection == .reverse, let beforeVC = self.beforeViewController {
+                    self.delegate?.em_pageViewController?(self, isScrollingFrom: selectedVC, destinationViewController: beforeVC, progress: progress)
                 }
             }
             
             // Thresholds to update view layouts call delegates
-            if (progress >= 1 && self.afterViewController != nil) {
-                self.didFinishScrolling(to: self.afterViewController!)
-            } else if (progress <= -1  && self.beforeViewController != nil) {
-                self.didFinishScrolling(to: self.beforeViewController!)
-            } else if (progress == 0  && self.selectedViewController != nil) {
-                self.didFinishScrolling(to: self.selectedViewController!)
+            if progress >= 1, let afterVC = self.afterViewController {
+                self.didFinishScrolling(to: afterVC)
+            } else if progress <= -1, let beforeVC = self.beforeViewController {
+                self.didFinishScrolling(to: beforeVC)
+            } else if progress == 0, let selectedVC = self.selectedViewController {
+                self.didFinishScrolling(to: selectedVC)
             }
             
         }
